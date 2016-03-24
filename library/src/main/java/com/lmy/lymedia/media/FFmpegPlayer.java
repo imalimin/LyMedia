@@ -162,12 +162,12 @@ public class FFmpegPlayer {
                     sleepFunc(rate);
                     continue;
                 }
-                if (mAudioGrabber.getFrameNumber() >= curFrameNumber + 1) {
-                    sleepFunc(rate);
-                    continue;
-                }
-                try {
-                    synchronized (mFrameGrabber) {
+                synchronized (mAudioGrabber) {
+                    if (mAudioGrabber.getFrameNumber() >= curFrameNumber + 1) {
+                        sleepFunc(rate);
+                        continue;
+                    }
+                    try {
                         if (!play) continue;
                         Frame f = mAudioGrabber.grabSamples();
                         if (frameType(f) == 1) {
@@ -175,9 +175,9 @@ public class FFmpegPlayer {
                         } else {
                             sleepFunc(5);
                         }
+                    } catch (FrameGrabber.Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (FrameGrabber.Exception e) {
-                    e.printStackTrace();
                 }
             }
         }
@@ -251,29 +251,29 @@ public class FFmpegPlayer {
             try {
                 seek(0);
                 audioThread.start();
-                while (run && curFrameNumber < mFrameGrabber.getLengthInFrames() - 5) {
-                    if (!play) {
-                        sleepFunc(rate);
-                        continue;
-                    }
-                    long time = System.currentTimeMillis();
-                    synchronized (mFrameGrabber) {
-                        if (!play) continue;
-                        cacheFrame = mFrameGrabber.grabImage();
-                    }
-                    long time2 = System.currentTimeMillis();
-                    if (draw(cacheFrame)) {//frameType(cacheFrame) == 0
-                        ++curFrameNumber;
-                        if (isLooping() && curFrameNumber >= mFrameGrabber.getLengthInFrames() - 5) {
-                            Log.w(TAG, "rePlay!!!");
-                            seek(0);
+                synchronized (mFrameGrabber) {
+                    while (run && curFrameNumber < mFrameGrabber.getLengthInFrames() - 5) {
+                        if (!play) {
+                            sleepFunc(rate);
                             continue;
                         }
-                        long wait = rate - System.currentTimeMillis() + time;
+                        long time = System.currentTimeMillis();
+                        if (!play) continue;
+                        cacheFrame = mFrameGrabber.grabImage();
+                        long time2 = System.currentTimeMillis();
+                        if (draw(cacheFrame)) {//frameType(cacheFrame) == 0
+                            ++curFrameNumber;
+                            if (isLooping() && curFrameNumber >= mFrameGrabber.getLengthInFrames() - 5) {
+                                Log.w(TAG, "rePlay!!!");
+                                seek(0);
+                                continue;
+                            }
+                            long wait = rate - System.currentTimeMillis() + time;
 //                        Log.v(TAG, "grabber time=" + (time2 - time) + ", draw time=" + (rate - wait - time2 + time) + ", wait=" + wait);
 //                        if (wait < 0)
 //                            Log.w(TAG, "wait=" + wait + ", Rendering time is low!");
-                        sleepFunc(wait < 0 ? 0 : wait);
+                            sleepFunc(wait < 0 ? 0 : wait);
+                        }
                     }
 //                    else if (frameType(cacheFrame) == 1) {
 //                        audioThread.getAudioDevice().writeSamples(cacheFrame.samples);
@@ -313,14 +313,19 @@ public class FFmpegPlayer {
     }
 
     private void seek(int number) {
-        if (number > mFrameGrabber.getLengthInFrames()) return;
-        this.curFrameNumber = number;
-        try {
-            mFrameGrabber.setFrameNumber(curFrameNumber);
-            mAudioGrabber.setFrameNumber(curFrameNumber);
-        } catch (FrameGrabber.Exception e) {
-            e.printStackTrace();
+        synchronized (mFrameGrabber) {
+            if (number > mFrameGrabber.getLengthInFrames()) return;
+            this.curFrameNumber = number;
+            try {
+                mFrameGrabber.setFrameNumber(curFrameNumber);
+                synchronized (mAudioGrabber) {
+                    mAudioGrabber.setFrameNumber(curFrameNumber);
+                }
+            } catch (FrameGrabber.Exception e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     public void play() {
