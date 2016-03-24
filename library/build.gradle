@@ -16,12 +16,27 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+//定义一个函数，target是生成jar包的文件名，classDir是class文件所在的文件夹
+def makeJar(String target, String classDir) {
+    exec {
+        executable "jar"   //调用jar
+        args "cvf", target
+        args "-C", classDir
+        args "", "."
+    }
+}
+//新建一个task,名为buildLib,依赖build(build是一个自带的task)
+task buildLib(dependsOn: ['build']) << {
+    makeJar("build/lymedia.jar", "build/intermediates/classes/release")
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'org.bytedeco:javacpp:1.1'
     compile 'org.bytedeco:javacv:1.1'
 }
