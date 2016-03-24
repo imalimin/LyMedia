@@ -166,14 +166,15 @@ public class FFmpegPlayer {
                     sleepFunc(rate);
                     continue;
                 }
-//                audioDevice.writeSamples(new Buffer[]{poll(), poll()});
-//                buffers = null;
                 try {
-                    Frame f = mAudioGrabber.grabSamples();
-                    if (frameType(f) == 1) {
-                        audioDevice.writeSamples(f.samples);
-                    } else {
-                        sleepFunc(5);
+                    synchronized (mFrameGrabber) {
+                        if (!play) continue;
+                        Frame f = mAudioGrabber.grabSamples();
+                        if (frameType(f) == 1) {
+                            audioDevice.writeSamples(f.samples);
+                        } else {
+                            sleepFunc(5);
+                        }
                     }
                 } catch (FrameGrabber.Exception e) {
                     e.printStackTrace();
@@ -256,7 +257,10 @@ public class FFmpegPlayer {
                         continue;
                     }
                     long time = System.currentTimeMillis();
-                    cacheFrame = mFrameGrabber.grabImage();
+                    synchronized (mFrameGrabber) {
+                        if (!play) continue;
+                        cacheFrame = mFrameGrabber.grabImage();
+                    }
                     long time2 = System.currentTimeMillis();
                     if (draw(cacheFrame)) {//frameType(cacheFrame) == 0
                         ++curFrameNumber;
@@ -335,15 +339,19 @@ public class FFmpegPlayer {
         mPlayerThread.stopRun();
         audioThread.stopRun();
         try {
-            if (mFrameGrabber != null) {
-                mFrameGrabber.stop();
-                mFrameGrabber.release();
-                mFrameGrabber = null;
+            synchronized (mFrameGrabber) {
+                if (mFrameGrabber != null) {
+                    mFrameGrabber.stop();
+                    mFrameGrabber.release();
+                    mFrameGrabber = null;
+                }
             }
-            if (mAudioGrabber != null) {
-                mAudioGrabber.stop();
-                mAudioGrabber.release();
-                mAudioGrabber = null;
+            synchronized (mAudioGrabber) {
+                if (mAudioGrabber != null) {
+                    mAudioGrabber.stop();
+                    mAudioGrabber.release();
+                    mAudioGrabber = null;
+                }
             }
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
