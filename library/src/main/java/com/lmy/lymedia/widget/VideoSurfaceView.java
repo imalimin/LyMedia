@@ -12,13 +12,14 @@ import android.view.SurfaceView;
 
 import com.lmy.lymedia.media.FFmpegPlayer;
 import com.lmy.lymedia.media.Render;
+import com.lmy.lymedia.media.VideoPlayer;
 import com.lmy.lymedia.utils.Util;
 
 /**
  * Created by Administrator on 2016/3/21.
  */
 public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
-    private FFmpegPlayer mPlayer;
+    private VideoPlayer mPlayer;
 
     public VideoSurfaceView(Context context) {
         super(context);
@@ -46,12 +47,12 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     }
 
     public void initPlayer(String path) {
-        mPlayer = FFmpegPlayer.create(getHolder(), path);
+        mPlayer = VideoPlayer.create(getHolder(), path);
         mPlayer.setLooping(true);
     }
 
     public void setRender(Render render) {
-        mPlayer.setRender(render);
+//        mPlayer.setRender(render);
     }
 
     private void initLayout(int width, int height) {
