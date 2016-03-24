@@ -45,6 +45,7 @@ public class FFmpegPlayer {
     //设置相关
     private String sourcePath;
     private boolean looping;
+    private boolean autoPlay = true;
     private Render render;
 
     public static FFmpegPlayer create(SurfaceHolder mHolder) {
@@ -66,6 +67,7 @@ public class FFmpegPlayer {
 
     public void setDataSource(String path) {
         this.sourcePath = path;
+        this.curFrameNumber = 0;
         this.hasInit = false;
         mFrameConverter = new AndroidFrameConverter();
         try {
@@ -102,6 +104,7 @@ public class FFmpegPlayer {
         audioThread.initTrack(mFrameGrabber.getSampleRate(), mFrameGrabber.getAudioChannels());
         mPlayerThread.start();
         this.hasInit = true;
+        if (isAutoPlay()) play();
     }
 
     private void render(Frame frame) {
@@ -365,6 +368,14 @@ public class FFmpegPlayer {
 
     public void setLooping(boolean looping) {
         this.looping = looping;
+    }
+
+    public boolean isAutoPlay() {
+        return autoPlay;
+    }
+
+    public void setAutoPlay(boolean autoPlay) {
+        this.autoPlay = autoPlay;
     }
 
     public String getSourcePath() {
