@@ -1,3 +1,8 @@
+/local.properties
+/.idea
+.DS_Store
+*.iml
+
 # Built application files
 *.apk
 *.ap_
@@ -14,6 +19,7 @@ gen/
 
 # Gradle files
 .gradle/
+gradle/
 build/
 
 # Local configuration file (sdk path, etc)
