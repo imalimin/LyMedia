@@ -50,6 +50,7 @@ public class FFmpegPlayer {
     //设置相关
     private String sourcePath;
     private boolean looping;
+    private Render render;
 
     public static FFmpegPlayer create(SurfaceHolder mHolder) {
         return new FFmpegPlayer(mHolder);
@@ -109,40 +110,28 @@ public class FFmpegPlayer {
         this.hasInit = true;
     }
 
-    private long bufferSize(Buffer src) {
-        int elements = src.remaining();
-        int shift;
-        if (src instanceof ByteBuffer) {
-            shift = 0;
-        } else if (src instanceof ShortBuffer) {
-            shift = 1;
-        } else if (src instanceof IntBuffer) {
-            shift = 2;
-        } else {
-            throw new RuntimeException("unsupported Buffer subclass");
-        }
-
-        return (long) elements << shift;
+    private void render(Frame frame) {
+        if (render == null) return;
+        render.render(frame);
     }
-
-    private Frame render(Frame frame) {
-        opencv_core.IplImage image = converter.convertToIplImage(frame);
-        opencv_core.Mat src = new opencv_core.Mat(image);
-        // Define output image
-        opencv_core.Mat dest = new opencv_core.Mat();
-        // Construct sharpening kernel, oll unassigned values are 0
-        opencv_core.Mat kernel = new opencv_core.Mat(3, 3, opencv_core.CV_32F, new opencv_core.Scalar(0));
-        // Indexer is used to access value in the matrix
-        FloatIndexer ki = kernel.createIndexer();
-        ki.put(1, 1, 5);
-        ki.put(0, 1, -1);
-        ki.put(2, 1, -1);
-        ki.put(1, 0, -1);
-        ki.put(1, 2, -1);
-        // Filter the image
-        filter2D(src, dest, src.depth(), kernel);
-        return converter.convert(dest);
-    }
+//    private Frame render(Frame frame) {
+//        opencv_core.IplImage image = converter.convertToIplImage(frame);
+//        opencv_core.Mat src = new opencv_core.Mat(image);
+//        // Define output image
+//        opencv_core.Mat dest = new opencv_core.Mat();
+//        // Construct sharpening kernel, oll unassigned values are 0
+//        opencv_core.Mat kernel = new opencv_core.Mat(3, 3, opencv_core.CV_32F, new opencv_core.Scalar(0));
+//        // Indexer is used to access value in the matrix
+//        FloatIndexer ki = kernel.createIndexer();
+//        ki.put(1, 1, 5);
+//        ki.put(0, 1, -1);
+//        ki.put(2, 1, -1);
+//        ki.put(1, 0, -1);
+//        ki.put(1, 2, -1);
+//        // Filter the image
+//        filter2D(src, dest, src.depth(), kernel);
+//        return converter.convert(dest);
+//    }
 
     private int frameType(Frame frame) {
         if (frame == null) return -1;
@@ -244,7 +233,7 @@ public class FFmpegPlayer {
 //        } catch (FrameFilter.Exception e) {
 //            e.printStackTrace();
 //        }
-//        frame = render(frame);
+        render(frame);
         Bitmap bmp = mFrameConverter.convert(frame);
         if (bmp == null) return false;
         synchronized (mHolder) {
@@ -264,7 +253,7 @@ public class FFmpegPlayer {
             try {
                 seek(0);
                 audioThread.start();
-                while (run && curFrameNumber < mFrameGrabber.getLengthInFrames()-5) {
+                while (run && curFrameNumber < mFrameGrabber.getLengthInFrames() - 5) {
                     if (!play) {
                         sleepFunc(rate);
                         continue;
@@ -274,7 +263,7 @@ public class FFmpegPlayer {
                     long time2 = System.currentTimeMillis();
                     if (draw(cacheFrame)) {//frameType(cacheFrame) == 0
                         ++curFrameNumber;
-                        if (isLooping() && curFrameNumber >= mFrameGrabber.getLengthInFrames()-5) {
+                        if (isLooping() && curFrameNumber >= mFrameGrabber.getLengthInFrames() - 5) {
                             Log.w(TAG, "rePlay!!!");
                             seek(0);
                             continue;
@@ -362,6 +351,10 @@ public class FFmpegPlayer {
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void setRender(Render render) {
+        this.render = render;
     }
 
     public int getWidth() {

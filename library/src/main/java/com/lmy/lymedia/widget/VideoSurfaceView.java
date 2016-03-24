@@ -11,6 +11,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.lmy.lymedia.media.FFmpegPlayer;
+import com.lmy.lymedia.media.Render;
 import com.lmy.lymedia.utils.Util;
 
 /**
@@ -40,10 +41,17 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         init();
     }
 
-    protected void init() {
+    private void init() {
         getHolder().addCallback(this);
-        mPlayer = FFmpegPlayer.create(getHolder(), Util.getSdcardPath() + "/test.mp4");
+    }
+
+    public void initPlayer(String path) {
+        mPlayer = FFmpegPlayer.create(getHolder(), path);
         mPlayer.setLooping(true);
+    }
+
+    public void setRender(Render render) {
+        mPlayer.setRender(render);
     }
 
     private void initLayout(int width, int height) {
