@@ -6,25 +6,20 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacv.AndroidFrameConverter;
 import org.bytedeco.javacv.FFmpegFrameFilter;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameFilter;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
 import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGB565;
-import static org.bytedeco.javacpp.opencv_imgproc.filter2D;
 
 /**
  * Created by Administrator on 2016/3/23.
@@ -96,8 +91,7 @@ public class FFmpegPlayer {
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
-//        mFilter = new FFmpegFrameFilter("transpose=cclock_flip", mFrameGrabber.getImageWidth(), mFrameGrabber.getImageHeight());
-//        mFilter.setPixelFormat(AV_PIX_FMT_RGB565);
+//        mFilter = new FFmpegFrameFilter("transpose=clock", mFrameGrabber.getImageWidth(), mFrameGrabber.getImageHeight());
 //        try {
 //            mFilter.start();
 //        } catch (FrameFilter.Exception e) {
