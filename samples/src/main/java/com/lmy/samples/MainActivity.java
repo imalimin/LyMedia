@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
                 mSurfaceView.initPlayer(Util.getSdcardPath() + "/test.mp4");
             }
         });
-        oneBtn.setOnClickListener(new View.OnClickListener() {
+        twoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mSurfaceView.releasePlaer();
