@@ -3,8 +3,11 @@ package com.lmy.lymedia.media;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
+
+import com.lmy.lymedia.utils.FrameUtil;
 
 import org.bytedeco.javacv.AndroidFrameConverter;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -163,18 +166,6 @@ public class VideoPlayer extends Player {
         return true;
     }
 
-    private Frame copy(Frame frame) {
-        Frame tmp = new Frame();
-        int type = frameType(frame);
-        if (type == 0) {
-            tmp = new Frame(frame.imageWidth, frame.imageHeight, frame.imageDepth, frame.imageChannels);
-            tmp.image = frame.image.clone();
-        } else {
-            tmp.samples = frame.samples.clone();
-        }
-        return tmp;
-    }
-
     private class BaseThread extends Thread {
         protected boolean run = false;
 
@@ -250,18 +241,15 @@ public class VideoPlayer extends Player {
         }
     }
 
-    private int frameType(Frame frame) {
-        if (frame == null) return -1;
-        if (frame.image != null) return 0;
-        else if (frame.samples != null) return 1;
-        else return -1;
-    }
-
     private void tryPlay() {
-        if (!mPlayImageThread.isRun())
-            mPlayImageThread.start();
-        if (!mPlaySampleThread.isRun())
-            mPlaySampleThread.start();
+        synchronized (mPlayImageThread) {
+            if (!mPlayImageThread.isAlive())
+                mPlayImageThread.start();
+        }
+        synchronized (mPlaySampleThread) {
+            if (!mPlaySampleThread.isAlive())
+                mPlaySampleThread.start();
+        }
     }
 
     private class DecodeThread extends BaseThread {
@@ -269,33 +257,50 @@ public class VideoPlayer extends Player {
         public void run() {
             super.run();
             synchronized (mFrameGrabber) {
-                sampleQueue = new LinkedList<>();
                 seek(0);
                 try {
+                    Frame image = FrameUtil.copy(mFrameGrabber.grabImage());
+                    Frame sample = FrameUtil.copy(mFrameGrabber.grabSamples());
                     while (run && curFrameNumber < mFrameGrabber.getLengthInFrames() - 5) {
                         if (!play) {
                             sleepFunc(rate);
                             continue;
                         }
-                        Frame frame = mFrameGrabber.grab();
-                        int type = frameType(frame);
-                        if (type == 0) {
-                            frame = copy(frame);
-                            while (isRun() && !offerImage(frame)) {
-//                                if (sampleQueueSize() >= SAMPLE_CACHE_LIMIT)
-                                tryPlay();
-                                Log.v(TAG, "try offer image!");
-                                sleepFunc(2);
-                            }
-                        } else if (type == 1) {
-                            frame = copy(frame);
-                            while (isRun() && !offerSample(frame)) {
-//                                if (imageQueueSize() >= FRAME_CACHE_LIMIT)
-                                tryPlay();
-//                                Log.v(TAG, "try offer sample!");
-                                sleepFunc(2);
+                        if (FrameUtil.frameType(image) == 0) {
+                            if (offerImage(FrameUtil.copy(image))) {
+                                Log.v(TAG, "offer image!");
+                                image = FrameUtil.copy(mFrameGrabber.grabImage());
                             }
                         }
+//                            image = copy(mFrameGrabber.grabImage());
+                        if (FrameUtil.frameType(sample) == 1) {
+                            if (offerSample(FrameUtil.copy(sample))) {
+                                Log.v(TAG, "offer sample!");
+                                sample = FrameUtil.copy(mFrameGrabber.grabSamples());
+                            } else
+                                tryPlay();
+                        }
+//                            sample = copy(mFrameGrabber.grabSamples());
+//                        Log.v(TAG, "time=" + (System.currentTimeMillis() - time));
+//                        Frame frame = mFrameGrabber.grab();
+//                        int type = frameType(frame);
+//                        if (type == 0) {
+//                            frame = copy(frame);
+//                            while (isRun() && !offerImage(frame)) {
+////                                if (sampleQueueSize() >= SAMPLE_CACHE_LIMIT)
+//                                tryPlay();
+//                                Log.v(TAG, "try offer image!");
+//                                sleepFunc(2);
+//                            }
+//                        } else if (type == 1) {
+//                            frame = copy(frame);
+//                            while (isRun() && !offerSample(frame)) {
+////                                if (imageQueueSize() >= FRAME_CACHE_LIMIT)
+//                                tryPlay();
+////                                Log.v(TAG, "try offer sample!");
+//                                sleepFunc(2);
+//                            }
+//                        }
                     }
                 } catch (FrameGrabber.Exception e) {
                     e.printStackTrace();
