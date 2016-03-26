@@ -3,14 +3,12 @@ package com.lmy.lymedia.media;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.lmy.lymedia.utils.FrameUtil;
 
 import org.bytedeco.javacv.AndroidFrameConverter;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 
@@ -246,10 +244,10 @@ public class VideoPlayer extends Player {
             if (!mPlayImageThread.isAlive())
                 mPlayImageThread.start();
         }
-        synchronized (mPlaySampleThread) {
-            if (!mPlaySampleThread.isAlive())
-                mPlaySampleThread.start();
-        }
+//        synchronized (mPlaySampleThread) {
+//            if (!mPlaySampleThread.isAlive())
+//                mPlaySampleThread.start();
+//        }
     }
 
     private class DecodeThread extends BaseThread {
@@ -257,30 +255,39 @@ public class VideoPlayer extends Player {
         public void run() {
             super.run();
             synchronized (mFrameGrabber) {
+                imageQueue = new LinkedList<>();
+                sampleQueue = new LinkedList<>();
                 seek(0);
                 try {
-                    Frame image = FrameUtil.copy(mFrameGrabber.grabImage());
-                    Frame sample = FrameUtil.copy(mFrameGrabber.grabSamples());
+                    Frame image = mFrameGrabber.grabImage();
+                    Frame sample = mFrameGrabber.grabSamples();
                     while (run && curFrameNumber < mFrameGrabber.getLengthInFrames() - 5) {
                         if (!play) {
                             sleepFunc(rate);
                             continue;
                         }
+                        long time = System.currentTimeMillis();
                         if (FrameUtil.frameType(image) == 0) {
                             if (offerImage(FrameUtil.copy(image))) {
-                                Log.v(TAG, "offer image!");
-                                image = FrameUtil.copy(mFrameGrabber.grabImage());
+//                                Log.v(TAG, "offer image!");
+                                image = mFrameGrabber.grabImage();
                             }
                         }
-//                            image = copy(mFrameGrabber.grabImage());
                         if (FrameUtil.frameType(sample) == 1) {
-                            if (offerSample(FrameUtil.copy(sample))) {
-                                Log.v(TAG, "offer sample!");
-                                sample = FrameUtil.copy(mFrameGrabber.grabSamples());
-                            } else
-                                tryPlay();
+//                            if (offerSample(sample)) {
+//                                Log.v(TAG, "offer sample!");
+//                                sample = mFrameGrabber.grabSamples();
+//                            }
+                            if (play) {
+//                                Log.v(TAG, "offer sample!");
+                                audioDevice.writeSamples(sample.samples);
+                                sample = mFrameGrabber.grabSamples();
+                            }
                         }
-//                            sample = copy(mFrameGrabber.grabSamples());
+                        Log.v(TAG, "time=" + (System.currentTimeMillis() - time));
+                        if (imageQueueSize() >= FRAME_CACHE_LIMIT)
+                            tryPlay();
+
 //                        Log.v(TAG, "time=" + (System.currentTimeMillis() - time));
 //                        Frame frame = mFrameGrabber.grab();
 //                        int type = frameType(frame);
@@ -340,7 +347,7 @@ public class VideoPlayer extends Player {
                 if (imageQueueSize() > 0)
                     if (draw(pollImage())) {
                         ++curFrameNumber;
-                        Log.v(TAG, "draw image");
+//                        Log.v(TAG, "draw image");
                         long wait = rate - System.currentTimeMillis() + time;
                         sleepFunc(wait < 0 ? 0 : wait);
                     }
