@@ -6,6 +6,7 @@ import org.bytedeco.javacv.Frame;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 /**
  * Created by Administrator on 2016/3/21.
@@ -42,35 +43,27 @@ public class FrameUtil {
         Frame tmp = new Frame();
         int type = frameType(frame);
         if (type == 0) {
-//            int width = frame.imageWidth;
-//            int height = frame.imageHeight;
-//            tmp = new Frame(width, height, frame.imageDepth, frame.imageChannels);
-//            tmp.image = new Buffer[1];
-//            ByteBuffer in = (ByteBuffer) frame.image[0];
-//            in.position(0);
-//            ByteBuffer buffer = ByteBuffer.allocate(in.capacity());
-//
-//            for (int y = 0; y < height; y++) {
-//                for (int x = 0; x < width; x++) {
-//                    if (x == width-1)
-//                        x = width-1;
-//                    int i0 = y  + 3 * x;
-//                    int i1 = y  + 3 * x + 1;
-//                    int i2 = y  + 3 * x + 2;
-//                    byte r = in.get(i0);
-//                    byte g = in.get(i1);
-//                    byte b = in.get(i2);
-//                    buffer.put(i0, r);
-//                    buffer.put(i0, g);
-//                    buffer.put(i2, b);
-//                }
-//            }
-//            tmp.image[0] = buffer.position(0);
             tmp = new Frame(frame.imageWidth, frame.imageHeight, frame.imageDepth, frame.imageChannels);
-            tmp.image = frame.image.clone();
+            tmp.image = new Buffer[1];
+            ByteBuffer in = (ByteBuffer) frame.image[0].position(0);
+            tmp.image[0] = copy(in);
         } else {
-            tmp.samples = frame.samples.clone();
+            tmp.samples = new Buffer[frame.samples.length];
+            for (int i = 0; i < tmp.samples.length; i++)
+                tmp.samples[i] = copy((FloatBuffer) frame.samples[i].position(0));
         }
         return tmp;
+    }
+
+    public static ByteBuffer copy(ByteBuffer src) {
+        byte[] data = new byte[src.capacity()];
+        src.get(data);
+        return ByteBuffer.wrap(data);
+    }
+
+    public static FloatBuffer copy(FloatBuffer src) {
+        float[] data = new float[src.capacity()];
+        src.get(data);
+        return FloatBuffer.wrap(data);
     }
 }
