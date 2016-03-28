@@ -6,11 +6,12 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import com.lmy.lymedia.media.render.Render;
+
 import org.bytedeco.javacv.AndroidFrameConverter;
 import org.bytedeco.javacv.FFmpegFrameFilter;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameFilter;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
