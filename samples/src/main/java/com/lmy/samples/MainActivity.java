@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         mSurfaceView = (VideoSurfaceView) findViewById(R.id.surface);
         oneBtn = (Button) findViewById(R.id.button1);
         twoBtn = (Button) findViewById(R.id.button2);
-        mSurfaceView.initPlayer(Util.getSdcardPath() + "/test.flv");
+        mSurfaceView.initPlayer(Util.getSdcardPath() + "/test.mp4");
         oneBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
