@@ -10,7 +10,6 @@ import org.bytedeco.javacv.AndroidFrameConverter;
 import org.bytedeco.javacv.FFmpegFrameFilter;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameFilter;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
@@ -19,12 +18,12 @@ import java.nio.FloatBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGB565;
+import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGBA;
 
 /**
  * Created by Administrator on 2016/3/23.
  */
-public class FFmpegPlayer {
+public class FFmpegPlayer extends Player {
     private final static String TAG = "FFmpegPlayer";
     private SurfaceHolder mHolder;
     private FFmpegFrameGrabber mFrameGrabber;//解码器
@@ -35,17 +34,12 @@ public class FFmpegPlayer {
     private Frame cacheFrame;//缓存帧
     private PlayerThread mPlayerThread;
     private AudioThread audioThread;
-    private int curFrameNumber = 0;
-    private long rate = 0;
-    private boolean play = false;
 
     //状态相关
     private boolean hasInit = false;
 
     //设置相关
     private String sourcePath;
-    private boolean looping;
-    private boolean autoPlay = true;
     private Render render;
 
     public static FFmpegPlayer create(SurfaceHolder mHolder) {
@@ -83,7 +77,7 @@ public class FFmpegPlayer {
                 mAudioGrabber = null;
             }
             mFrameGrabber = FFmpegFrameGrabber.createDefault(path);
-            mFrameGrabber.setPixelFormat(AV_PIX_FMT_RGB565);
+            mFrameGrabber.setPixelFormat(AV_PIX_FMT_RGBA);
             mAudioGrabber = FFmpegFrameGrabber.createDefault(path);
             mFrameGrabber.start();
             this.rate = Math.round(1000d / mFrameGrabber.getFrameRate());
@@ -249,7 +243,7 @@ public class FFmpegPlayer {
         public void run() {
             super.run();
             try {
-                seek(0);
+                seek(5);
                 audioThread.start();
                 synchronized (mFrameGrabber) {
                     while (run && curFrameNumber < mFrameGrabber.getLengthInFrames() - 5) {
@@ -263,7 +257,7 @@ public class FFmpegPlayer {
                         long time2 = System.currentTimeMillis();
                         if (draw(cacheFrame)) {//frameType(cacheFrame) == 0
                             ++curFrameNumber;
-                            if (isLooping() && curFrameNumber >= mFrameGrabber.getLengthInFrames() - 5) {
+                            if (isLooping() && curFrameNumber >= mFrameGrabber.getLengthInFrames() - 5) {//重复播放
                                 Log.w(TAG, "rePlay!!!");
                                 seek(0);
                                 continue;
@@ -273,6 +267,9 @@ public class FFmpegPlayer {
 //                        if (wait < 0)
 //                            Log.w(TAG, "wait=" + wait + ", Rendering time is low!");
                             sleepFunc(wait < 0 ? 0 : wait);
+                        } else {//强制跳帧播放
+                            ++curFrameNumber;
+                            seek(curFrameNumber);
                         }
                     }
 //                    else if (frameType(cacheFrame) == 1) {
@@ -312,9 +309,11 @@ public class FFmpegPlayer {
         }
     }
 
-    private void seek(int number) {
+    @Override
+    public void seek(int number) {
         synchronized (mFrameGrabber) {
             if (number > mFrameGrabber.getLengthInFrames()) return;
+            super.seek(number);
             this.curFrameNumber = number;
             try {
                 mFrameGrabber.setFrameNumber(curFrameNumber);
@@ -328,19 +327,22 @@ public class FFmpegPlayer {
 
     }
 
+    @Override
     public void play() {
         if (!hasInit) return;
-        this.play = true;
+        super.play();
     }
 
+    @Override
     public void pause() {
         if (!hasInit) return;
-        this.play = false;
+        super.pause();
     }
 
+    @Override
     public void stop() {
         if (!hasInit) return;
-        this.play = false;
+        super.stop();
         mPlayerThread.stopRun();
         audioThread.stopRun();
         try {
@@ -367,26 +369,32 @@ public class FFmpegPlayer {
         this.render = render;
     }
 
+    @Override
     public int getWidth() {
         return mFrameGrabber.getImageWidth();
     }
 
+    @Override
     public int getHeight() {
         return mFrameGrabber.getImageHeight();
     }
 
+    @Override
     public boolean isLooping() {
         return looping;
     }
 
+    @Override
     public void setLooping(boolean looping) {
         this.looping = looping;
     }
 
+    @Override
     public boolean isAutoPlay() {
         return autoPlay;
     }
 
+    @Override
     public void setAutoPlay(boolean autoPlay) {
         this.autoPlay = autoPlay;
     }

@@ -19,7 +19,7 @@ import com.lmy.lymedia.utils.Util;
  * Created by Administrator on 2016/3/21.
  */
 public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
-    private VideoPlayer mPlayer;
+    private FFmpegPlayer mPlayer;
 
     public VideoSurfaceView(Context context) {
         super(context);
@@ -47,7 +47,7 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     }
 
     public void initPlayer(String path) {
-        mPlayer = VideoPlayer.create(getHolder(), path);
+        mPlayer = FFmpegPlayer.create(getHolder(), path);
         mPlayer.setLooping(true);
     }
 
