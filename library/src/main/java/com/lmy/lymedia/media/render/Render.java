@@ -1,4 +1,4 @@
-package com.lmy.lymedia.media;
+package com.lmy.lymedia.media.render;
 
 import org.bytedeco.javacv.Frame;
 
@@ -6,5 +6,5 @@ import org.bytedeco.javacv.Frame;
  * Created by Administrator on 2016/3/24.
  */
 public interface Render {
-    void render(Frame frame);
+    Frame render(Frame frame);
 }
