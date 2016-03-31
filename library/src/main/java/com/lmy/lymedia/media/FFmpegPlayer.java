@@ -2,6 +2,7 @@ package com.lmy.lymedia.media;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -20,6 +21,7 @@ import java.nio.FloatBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGB565;
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGBA;
 
 /**
@@ -65,6 +67,7 @@ public class FFmpegPlayer extends Player {
         this.sourcePath = path;
         this.curFrameNumber = 0;
         this.hasInit = false;
+        clearView();
         mFrameConverter = new AndroidFrameConverter();
         try {
             //如果已经有实例，则先释放资源再初始化
@@ -79,7 +82,7 @@ public class FFmpegPlayer extends Player {
                 mAudioGrabber = null;
             }
             mFrameGrabber = FFmpegFrameGrabber.createDefault(path);
-            mFrameGrabber.setPixelFormat(AV_PIX_FMT_RGBA);
+            mFrameGrabber.setPixelFormat(AV_PIX_FMT_RGB565);
             mAudioGrabber = FFmpegFrameGrabber.createDefault(path);
             mFrameGrabber.start();
             this.rate = Math.round(1000d / mFrameGrabber.getFrameRate());
@@ -212,6 +215,15 @@ public class FFmpegPlayer extends Player {
         public void stopRun() {
             super.stopRun();
             audioDevice.release();
+        }
+    }
+
+    private void clearView() {
+        synchronized (mHolder) {
+            Canvas canvas = mHolder.lockCanvas();
+            if (canvas == null) return;
+            canvas.drawColor(Color.BLACK);
+            mHolder.unlockCanvasAndPost(canvas);
         }
     }
 
