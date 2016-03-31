@@ -10,6 +10,7 @@ import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.lmy.lymedia.media.FFmpegPlayer;
 import com.lmy.lymedia.media.render.Render;
 import com.lmy.lymedia.media.VideoPlayer;
 
