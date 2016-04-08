@@ -29,7 +29,7 @@ public class RenderActivity2 extends AppCompatActivity {
         mTextView = (TextView) findViewById(R.id.text);
         mVideoRender = new VideoRender(Util.getSdcardPath() + "/test.mp4", Util.getSdcardPath() + "/test_render.mp4");
         if (mVideoRender.init()) {
-            mVideoRender.setRender(new AcvFilter(Util.getSdcardPath() + "/test_filters/FA_Curves3.acv"));
+            mVideoRender.setFilter(new AcvFilter(Util.getSdcardPath() + "/test_filters/FA_Curves3.acv"));
             mVideoRender.setRenderListener(new VideoRender.RenderListener() {
                 @Override
                 public void onProgress(int progress) {
