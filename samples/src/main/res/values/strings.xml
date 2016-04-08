@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Samples</string>
+    <string name="title_activity_video_record">VideoRecordActivity</string>
 </resources>
