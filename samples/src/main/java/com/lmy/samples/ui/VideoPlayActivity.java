@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.lmy.lymedia.media.render.AcvFilter;
 import com.lmy.lymedia.utils.Util;
 import com.lmy.lymedia.widget.VideoSurfaceView;
 import com.lmy.samples.R;
@@ -22,6 +23,8 @@ public class VideoPlayActivity extends AppCompatActivity {
         oneBtn = (Button) findViewById(R.id.button1);
         twoBtn = (Button) findViewById(R.id.button2);
         mSurfaceView.initPlayer(Util.getSdcardPath() + "/test.f4v");
+        mSurfaceView.setFilter(new AcvFilter(Util.getSdcardPath() + "/test_filters/FA_Curves3.acv"));
+        mSurfaceView.play();
         oneBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
