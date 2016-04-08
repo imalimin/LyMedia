@@ -44,11 +44,11 @@ public class FrameUtil {
         int type = frameType(frame);
         if (type == 0) {
             tmp = new Frame(frame.imageWidth, frame.imageHeight, frame.imageDepth, frame.imageChannels);
-            tmp.image = new Buffer[1];
-            ByteBuffer in = (ByteBuffer) frame.image[0].position(0);
-            tmp.image[0] = copy(in);
+            tmp.image[0] = copy((ByteBuffer) frame.image[0]);
         } else {
-            tmp.samples = new Buffer[frame.samples.length];
+            tmp.sampleRate = frame.sampleRate;
+            tmp.audioChannels = frame.audioChannels;
+//            tmp.samples = frame.samples.clone();
             for (int i = 0; i < tmp.samples.length; i++)
                 tmp.samples[i] = copy((FloatBuffer) frame.samples[i].position(0));
         }
@@ -56,14 +56,52 @@ public class FrameUtil {
     }
 
     public static ByteBuffer copy(ByteBuffer src) {
-        byte[] data = new byte[src.capacity()];
-        src.get(data);
-        return ByteBuffer.wrap(data);
+        // Create the clone buffer with same capacity as the original
+        ByteBuffer cloneBuffer = ByteBuffer.allocateDirect(src.capacity());
+        //ByteBuffer cloneBuffer = deepCopy(originalByteBuffer);
+
+        // Save parameters from the original byte buffer
+        int position = src.position();
+        int limit = src.limit();
+
+        // Set range to the entire buffer
+        src.position(0).limit(src.capacity());
+
+        // Read from original and put into clone
+        cloneBuffer.put(src);
+
+        // Set the order same as original
+        cloneBuffer.order(src.order());
+
+        // Set clone position to 0 and set the range as the original
+        cloneBuffer.position(0);
+        cloneBuffer.position(position).limit(limit);
+
+        return cloneBuffer;
     }
 
     public static FloatBuffer copy(FloatBuffer src) {
-        float[] data = new float[src.capacity()];
-        src.get(data);
-        return FloatBuffer.wrap(data);
+        // Create the clone buffer with same capacity as the original
+        FloatBuffer cloneBuffer = FloatBuffer.allocate(src.capacity());
+        //ByteBuffer cloneBuffer = deepCopy(originalByteBuffer);
+
+        // Save parameters from the original byte buffer
+        int position = src.position();
+        int limit = src.limit();
+
+        // Set range to the entire buffer
+        src.position(0).limit(src.capacity());
+
+        // Read from original and put into clone
+        cloneBuffer.put(src);
+
+        // Set the order same as original
+//        cloneBuffer.order(src.order());
+
+        // Set clone position to 0 and set the range as the original
+        cloneBuffer.position(0);
+        cloneBuffer.position(position).limit(limit);
+
+        return cloneBuffer;
     }
 }
