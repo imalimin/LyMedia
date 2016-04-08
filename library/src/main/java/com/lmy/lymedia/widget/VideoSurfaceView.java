@@ -51,7 +51,7 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     }
 
     public void setRender(Render render) {
-//        mPlayer.setRender(render);
+        mPlayer.setRender(render);
     }
 
     private void initLayout(int width, int height) {

@@ -147,7 +147,7 @@ public class VideoRender {
                     mFrame = mFrameGrabber.grab();
                     int type = FrameUtil.frameType(mFrame);
                     if (type == 0) {
-//                        mFrame = render(mFrame);
+                        mFrame = render(mFrame);
                         mFrameRecorder.setTimestamp(mFrameGrabber.getTimestamp());
                         mFrameRecorder.record(mFrame);
                         ++mFrameNumber;
@@ -155,7 +155,7 @@ public class VideoRender {
                         Log.w("VideoRender", "Frame time: " + mFrameGrabber.getTimestamp());
                     } else if (type == 1) {
                         mFrameRecorder.recordSamples(mFrame.samples);
-                    } else break;
+                    }
                 } catch (FrameGrabber.Exception e) {
                     e.printStackTrace();
                     ++mFrameNumber;
@@ -164,6 +164,7 @@ public class VideoRender {
                     e.printStackTrace();
                 }
             }
+            Log.w("VideoRender", "release");
             release();
             publishProgress(100);
             return 0;
@@ -180,6 +181,14 @@ public class VideoRender {
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
         }
+    }
+
+    public int getWidth() {
+        return mFrameGrabber.getImageWidth();
+    }
+
+    public int getHeight() {
+        return mFrameGrabber.getImageHeight();
     }
 
     public interface RenderListener {
