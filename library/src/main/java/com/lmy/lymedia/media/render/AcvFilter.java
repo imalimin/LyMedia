@@ -11,13 +11,14 @@ import org.bytedeco.javacv.FrameFilter;
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGBA;
 
 /**
- * Created by lifeix on 2016/4/8.
+ * Created by lmy on 2016/4/8.
  */
-public class FilterRander implements Render {
+public class AcvFilter implements Filter {
+    private final static String FILTER = "curves=psfile='%s'";
     private FFmpegFrameFilter mFilter;
 
-    public FilterRander(int width, int height) {
-        mFilter = new FFmpegFrameFilter("curves=psfile='" + Util.getSdcardPath() + "/FA_Curves2.acv'", width, height);
+    public AcvFilter(String filter, int width, int height) {
+        mFilter = new FFmpegFrameFilter(String.format(FILTER, filter), width, height);
         mFilter.setPixelFormat(AV_PIX_FMT_RGBA);
         try {
             mFilter.start();
@@ -27,11 +28,11 @@ public class FilterRander implements Render {
     }
 
     @Override
-    public Frame render(Frame frame) {
+    public Frame filter(Frame frame) {
         try {
             mFilter.push(frame);
             while ((frame = mFilter.pull()) == null) {
-                Log.v("FilterRander", "wait render");
+                Log.v("AcvFilter", "wait render");
             }
         } catch (FrameFilter.Exception e) {
             e.printStackTrace();

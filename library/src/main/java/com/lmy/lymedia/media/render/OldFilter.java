@@ -13,19 +13,19 @@ import java.nio.ByteBuffer;
 /**
  * Created by Administrator on 2016/3/28.
  */
-public class OldRender implements Render {
+public class OldFilter implements Filter {
     private AndroidFrameConverter mFrameConverter;
     private OpenCVFrameConverter.ToIplImage mCVFrameConverter;
     private Bitmap mBitmap;
     private opencv_core.IplImage mIplImage;
 
-    public OldRender() {
+    public OldFilter() {
         mFrameConverter = new AndroidFrameConverter();
         mCVFrameConverter = new OpenCVFrameConverter.ToIplImage();
     }
 
     @Override
-    public Frame render(Frame frame) {
+    public Frame filter(Frame frame) {
 //        mBitmap = mFrameConverter.convert(frame);
 //        mBitmap = filter(mBitmap);
 //        return mFrameConverter.convert(mBitmap);

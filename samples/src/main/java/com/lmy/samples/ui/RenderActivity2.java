@@ -8,8 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lmy.lymedia.media.VideoRender;
-import com.lmy.lymedia.media.render.FilterRander;
-import com.lmy.lymedia.media.render.OldRender;
+import com.lmy.lymedia.media.render.AcvFilter;
 import com.lmy.lymedia.utils.Util;
 import com.lmy.samples.R;
 
@@ -30,7 +29,7 @@ public class RenderActivity2 extends AppCompatActivity {
         mTextView = (TextView) findViewById(R.id.text);
         mVideoRender = new VideoRender(Util.getSdcardPath() + "/test.mp4", Util.getSdcardPath() + "/test_render.mp4");
         if (mVideoRender.init()) {
-            mVideoRender.setRender(new FilterRander(mVideoRender.getWidth(), mVideoRender.getHeight()));
+            mVideoRender.setRender(new AcvFilter(Util.getSdcardPath() + "/test_filters/FA_Curves3.acv",mVideoRender.getWidth(), mVideoRender.getHeight()));
             mVideoRender.setRenderListener(new VideoRender.RenderListener() {
                 @Override
                 public void onProgress(int progress) {

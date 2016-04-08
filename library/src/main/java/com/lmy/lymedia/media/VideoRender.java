@@ -3,7 +3,7 @@ package com.lmy.lymedia.media;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.lmy.lymedia.media.render.Render;
+import com.lmy.lymedia.media.render.Filter;
 import com.lmy.lymedia.utils.FrameUtil;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
@@ -26,7 +26,7 @@ public class VideoRender {
     private Frame mFrame;
     private RenderTask mRenderTask;
     private RenderListener renderListener;
-    private Render mRender;
+    private Filter mFilter;
 
     public VideoRender(String srcPath, String dstPath) {
         this.srcPath = srcPath;
@@ -119,16 +119,16 @@ public class VideoRender {
         this.renderListener = renderListener;
     }
 
-    public void setRender(Render mRender) {
-        this.mRender = mRender;
+    public void setRender(Filter mRender) {
+        this.mFilter = mRender;
     }
 
     private class RenderTask extends AsyncTask<Void, Integer, Integer> {
         private boolean run = false;
 
-        private Frame render(Frame frame) {
-            if (mRender != null)
-                return mRender.render(frame);
+        private Frame filter(Frame frame) {
+            if (mFilter != null)
+                return mFilter.filter(frame);
             else return frame;
         }
 
@@ -147,7 +147,7 @@ public class VideoRender {
                     mFrame = mFrameGrabber.grab();
                     int type = FrameUtil.frameType(mFrame);
                     if (type == 0) {
-                        mFrame = render(mFrame);
+                        mFrame = filter(mFrame);
                         mFrameRecorder.setTimestamp(mFrameGrabber.getTimestamp());
                         mFrameRecorder.record(mFrame);
                         ++mFrameNumber;

@@ -11,8 +11,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.lmy.lymedia.media.FFmpegPlayer;
-import com.lmy.lymedia.media.render.Render;
-import com.lmy.lymedia.media.VideoPlayer;
+import com.lmy.lymedia.media.render.Filter;
 
 /**
  * Created by Administrator on 2016/3/21.
@@ -50,8 +49,8 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         mPlayer.setLooping(true);
     }
 
-    public void setRender(Render render) {
-        mPlayer.setRender(render);
+    public void setFilter(Filter filter) {
+        mPlayer.setFilter(filter);
     }
 
     private void initLayout(int width, int height) {

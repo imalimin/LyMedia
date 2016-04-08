@@ -7,7 +7,7 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import com.lmy.lymedia.media.render.Render;
+import com.lmy.lymedia.media.render.Filter;
 
 import org.bytedeco.javacv.AndroidFrameConverter;
 import org.bytedeco.javacv.FFmpegFrameFilter;
@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGB565;
-import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGBA;
 
 /**
  * Created by Administrator on 2016/3/23.
@@ -44,7 +43,7 @@ public class FFmpegPlayer extends Player {
 
     //设置相关
     private String sourcePath;
-    private Render render;
+    private Filter filter;
 
     public static FFmpegPlayer create(SurfaceHolder mHolder) {
         return new FFmpegPlayer(mHolder);
@@ -107,8 +106,8 @@ public class FFmpegPlayer extends Player {
     }
 
     private void render(Frame frame) {
-        if (render == null) return;
-        render.render(frame);
+        if (filter == null) return;
+        filter.filter(frame);
     }
 //    private Frame render(Frame frame) {
 //        opencv_core.IplImage image = converter.convertToIplImage(frame);
@@ -379,8 +378,8 @@ public class FFmpegPlayer extends Player {
         }
     }
 
-    public void setRender(Render render) {
-        this.render = render;
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
     @Override
