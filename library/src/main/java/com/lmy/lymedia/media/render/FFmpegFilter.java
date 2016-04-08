@@ -1,6 +1,7 @@
 package com.lmy.lymedia.media.render;
 
 import org.bytedeco.javacv.FFmpegFrameFilter;
+import org.bytedeco.javacv.FrameFilter;
 
 /**
  * Created by lmy on 2016/4/8.
@@ -16,5 +17,18 @@ public abstract class FFmpegFilter extends BaseFilter {
     @Override
     public void onStart() {
 
+    }
+
+    @Override
+    public void onStop() {
+        try {
+            if (mFilter != null) {
+                mFilter.stop();
+                mFilter.release();
+                mFilter = null;
+            }
+        } catch (FrameFilter.Exception e) {
+            e.printStackTrace();
+        }
     }
 }

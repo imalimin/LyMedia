@@ -96,6 +96,8 @@ public class VideoRender {
     }
 
     private void release() {
+        if (mFilter != null)
+            mFilter.onStop();
         try {
             if (mFrameGrabber != null) {//如果已经有实例，则先释放资源再初始化
                 mFrameGrabber.stop();
