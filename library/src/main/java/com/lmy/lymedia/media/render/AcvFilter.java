@@ -13,18 +13,12 @@ import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGBA;
 /**
  * Created by lmy on 2016/4/8.
  */
-public class AcvFilter implements Filter {
+public class AcvFilter extends FFmpegFilter {
     private final static String FILTER = "curves=psfile='%s'";
     private FFmpegFrameFilter mFilter;
 
-    public AcvFilter(String filter, int width, int height) {
-        mFilter = new FFmpegFrameFilter(String.format(FILTER, filter), width, height);
-        mFilter.setPixelFormat(AV_PIX_FMT_RGBA);
-        try {
-            mFilter.start();
-        } catch (FrameFilter.Exception e) {
-            e.printStackTrace();
-        }
+    public AcvFilter(String filter) {
+        super(filter);
     }
 
     @Override
@@ -39,4 +33,16 @@ public class AcvFilter implements Filter {
         }
         return frame;
     }
+
+    @Override
+    public void onStart() {
+        mFilter = new FFmpegFrameFilter(String.format(FILTER, filter), width, height);
+        mFilter.setPixelFormat(AV_PIX_FMT_RGBA);
+        try {
+            mFilter.start();
+        } catch (FrameFilter.Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

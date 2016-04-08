@@ -7,4 +7,8 @@ import org.bytedeco.javacv.Frame;
  */
 public interface Filter {
     Frame filter(Frame frame);
+
+    void onStart();
+
+    void onCreate(int width, int height);
 }

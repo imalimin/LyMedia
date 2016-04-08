@@ -35,7 +35,7 @@ public class VideoRender {
     }
 
     public boolean init() {
-        return initGrabber() && initRecorder(getWidth(),getHeight());
+        return initGrabber() && initRecorder(getWidth(), getHeight());
     }
 
     private boolean initGrabber() {
@@ -59,7 +59,7 @@ public class VideoRender {
         mFrameGrabber.setPixelFormat(fmt);
     }
 
-    private boolean initRecorder(int width,int height) {
+    private boolean initRecorder(int width, int height) {
         try {
             if (mFrameRecorder != null) {//如果已经有实例，则先释放资源再初始化
                 mFrameRecorder.stop();
@@ -119,8 +119,9 @@ public class VideoRender {
         this.renderListener = renderListener;
     }
 
-    public void setRender(Filter mRender) {
-        this.mFilter = mRender;
+    public void setRender(Filter filter) {
+        this.mFilter = filter;
+        mFilter.onCreate(getWidth(), getHeight());
     }
 
     private class RenderTask extends AsyncTask<Void, Integer, Integer> {
