@@ -1,4 +1,4 @@
-package com.lmy.samples;
+package com.lmy.samples.ui;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,8 +8,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lmy.lymedia.media.VideoRender;
+import com.lmy.lymedia.media.render.FilterRander;
 import com.lmy.lymedia.media.render.OldRender;
 import com.lmy.lymedia.utils.Util;
+import com.lmy.samples.R;
 
 public class RenderActivity2 extends AppCompatActivity {
     private Button mStartBtn;
@@ -26,9 +28,9 @@ public class RenderActivity2 extends AppCompatActivity {
     private void initView() {
         mStartBtn = (Button) findViewById(R.id.start);
         mTextView = (TextView) findViewById(R.id.text);
-        mVideoRender = new VideoRender(Util.getSdcardPath() + "/test1.mp4", Util.getSdcardPath() + "/test1_render.mp4");
+        mVideoRender = new VideoRender(Util.getSdcardPath() + "/test.mp4", Util.getSdcardPath() + "/test_render.mp4");
         if (mVideoRender.init()) {
-            mVideoRender.setRender(new OldRender());
+//            mVideoRender.setRender(new FilterRander(mVideoRender.getWidth(), mVideoRender.getHeight()));
             mVideoRender.setRenderListener(new VideoRender.RenderListener() {
                 @Override
                 public void onProgress(int progress) {

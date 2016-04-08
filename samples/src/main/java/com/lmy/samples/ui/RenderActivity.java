@@ -1,4 +1,4 @@
-package com.lmy.samples;
+package com.lmy.samples.ui;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.lmy.lymedia.utils.FrameUtil;
 import com.lmy.lymedia.utils.Util;
+import com.lmy.samples.R;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.opencv_core;
