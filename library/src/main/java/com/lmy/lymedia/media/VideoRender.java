@@ -96,8 +96,10 @@ public class VideoRender {
     }
 
     private void release() {
-        if (mFilter != null)
+        if (mFilter != null) {
             mFilter.onStop();
+            mFilter = null;
+        }
         try {
             if (mFrameGrabber != null) {//如果已经有实例，则先释放资源再初始化
                 mFrameGrabber.stop();
@@ -121,7 +123,7 @@ public class VideoRender {
         this.renderListener = renderListener;
     }
 
-    public void setRender(Filter filter) {
+    public void setFilter(Filter filter) {
         this.mFilter = filter;
         mFilter.onCreate(getWidth(), getHeight());
     }
