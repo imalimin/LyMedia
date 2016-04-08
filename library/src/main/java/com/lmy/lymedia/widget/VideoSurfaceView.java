@@ -18,6 +18,7 @@ import com.lmy.lymedia.media.render.Filter;
  */
 public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
     private FFmpegPlayer mPlayer;
+    private OnPreparedListener onPreparedListener;
 
     public VideoSurfaceView(Context context) {
         super(context);
@@ -49,6 +50,10 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         mPlayer.setLooping(true);
     }
 
+    public void play() {
+        mPlayer.play();
+    }
+
     public void setFilter(Filter filter) {
         mPlayer.setFilter(filter);
     }
@@ -64,7 +69,9 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v("SurfaceView", "surfaceCreated...");
         initLayout(mPlayer.getWidth(), mPlayer.getHeight());
-        mPlayer.play();
+        play();
+        if (onPreparedListener != null)
+            onPreparedListener.onPrepared();
     }
 
     @Override
@@ -80,5 +87,13 @@ public class VideoSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     public void releasePlaer() {
         mPlayer.stop();
+    }
+
+    public void setOnPreparedListener(OnPreparedListener onPreparedListener) {
+        this.onPreparedListener = onPreparedListener;
+    }
+
+    public interface OnPreparedListener {
+        void onPrepared();
     }
 }
