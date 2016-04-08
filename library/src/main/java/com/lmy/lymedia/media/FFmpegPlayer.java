@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGB565;
+import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_RGBA;
 
 /**
  * Created by Administrator on 2016/3/23.
@@ -32,8 +33,6 @@ public class FFmpegPlayer extends Player {
     private FFmpegFrameGrabber mFrameGrabber;//解码器
     private FFmpegFrameGrabber mAudioGrabber;//解码器
     private AndroidFrameConverter mFrameConverter;
-    private FFmpegFrameFilter mFilter;
-    OpenCVFrameConverter.ToIplImage converter;
     private Frame cacheFrame;//缓存帧
     private PlayerThread mPlayerThread;
     private AudioThread audioThread;
@@ -43,7 +42,7 @@ public class FFmpegPlayer extends Player {
 
     //设置相关
     private String sourcePath;
-    private Filter filter;
+    private Filter mFilter;
 
     public static FFmpegPlayer create(SurfaceHolder mHolder) {
         return new FFmpegPlayer(mHolder);
@@ -81,7 +80,7 @@ public class FFmpegPlayer extends Player {
                 mAudioGrabber = null;
             }
             mFrameGrabber = FFmpegFrameGrabber.createDefault(path);
-            mFrameGrabber.setPixelFormat(AV_PIX_FMT_RGB565);
+            mFrameGrabber.setPixelFormat(AV_PIX_FMT_RGBA);
             mAudioGrabber = FFmpegFrameGrabber.createDefault(path);
             mFrameGrabber.start();
             this.rate = Math.round(1000d / mFrameGrabber.getFrameRate());
@@ -91,12 +90,6 @@ public class FFmpegPlayer extends Player {
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
-//        mFilter = new FFmpegFrameFilter("transpose=clock", mFrameGrabber.getImageWidth(), mFrameGrabber.getImageHeight());
-//        try {
-//            mFilter.start();
-//        } catch (FrameFilter.Exception e) {
-//            e.printStackTrace();
-//        }
         mPlayerThread = new PlayerThread();
         audioThread = new AudioThread();
         audioThread.initTrack(mFrameGrabber.getSampleRate(), mFrameGrabber.getAudioChannels());
@@ -104,29 +97,6 @@ public class FFmpegPlayer extends Player {
         this.hasInit = true;
         if (isAutoPlay()) play();
     }
-
-    private void render(Frame frame) {
-        if (filter == null) return;
-        filter.filter(frame);
-    }
-//    private Frame render(Frame frame) {
-//        opencv_core.IplImage image = converter.convertToIplImage(frame);
-//        opencv_core.Mat src = new opencv_core.Mat(image);
-//        // Define output image
-//        opencv_core.Mat dest = new opencv_core.Mat();
-//        // Construct sharpening kernel, oll unassigned values are 0
-//        opencv_core.Mat kernel = new opencv_core.Mat(3, 3, opencv_core.CV_32F, new opencv_core.Scalar(0));
-//        // Indexer is used to access value in the matrix
-//        FloatIndexer ki = kernel.createIndexer();
-//        ki.put(1, 1, 5);
-//        ki.put(0, 1, -1);
-//        ki.put(2, 1, -1);
-//        ki.put(1, 0, -1);
-//        ki.put(1, 2, -1);
-//        // Filter the image
-//        filter2D(src, dest, src.depth(), kernel);
-//        return converter.convert(dest);
-//    }
 
     private int frameType(Frame frame) {
         if (frame == null) return -1;
@@ -226,6 +196,13 @@ public class FFmpegPlayer extends Player {
         }
     }
 
+
+    private Frame filter(Frame frame) {
+        if (mFilter != null && mFilter.isStarting())
+            return mFilter.filter(frame);
+        return frame;
+    }
+
     private boolean draw(Frame frame) {
         if (frame == null || frame.image == null) {
             return false;
@@ -238,7 +215,7 @@ public class FFmpegPlayer extends Player {
 //        } catch (FrameFilter.Exception e) {
 //            e.printStackTrace();
 //        }
-        render(frame);
+        frame = filter(frame);
         Bitmap bmp = mFrameConverter.convert(frame);
         if (bmp == null) return false;
         synchronized (mHolder) {
@@ -358,6 +335,10 @@ public class FFmpegPlayer extends Player {
         super.stop();
         mPlayerThread.stopRun();
         audioThread.stopRun();
+        if (mFilter != null) {
+            mFilter.onStop();
+            mFilter = null;
+        }
         try {
             synchronized (mFrameGrabber) {
                 if (mFrameGrabber != null) {
@@ -379,7 +360,8 @@ public class FFmpegPlayer extends Player {
     }
 
     public void setFilter(Filter filter) {
-        this.filter = filter;
+        this.mFilter = filter;
+        mFilter.onCreate(getWidth(), getHeight());
     }
 
     @Override
