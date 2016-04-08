@@ -15,12 +15,8 @@ public abstract class FFmpegFilter extends BaseFilter {
     }
 
     @Override
-    public void onStart() {
-
-    }
-
-    @Override
     public void onStop() {
+        starting = false;
         try {
             if (mFilter != null) {
                 mFilter.stop();

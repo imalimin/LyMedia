@@ -9,7 +9,10 @@ public interface Filter {
     Frame filter(Frame frame);
 
     void onStart();
+
     void onStop();
+
+    boolean isStarting();
 
     void onCreate(int width, int height);
 }
