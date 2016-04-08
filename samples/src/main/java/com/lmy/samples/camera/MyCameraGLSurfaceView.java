@@ -132,7 +132,7 @@ public class MyCameraGLSurfaceView extends CameraGLSurfaceView {
                 long time = System.currentTimeMillis();
                 Frame frame = recoderManager.getImageCache();
                 if (frame == null)
-                    frame = new Frame(cvCreateImage(new opencv_core.CvSize(videoWidth, videoHeight), opencv_core.IPL_DEPTH_8U, 4), 0, 0);
+                    frame = Frame.create(videoWidth, videoHeight, opencv_core.IPL_DEPTH_8U, 4);
                 if (frame != null) {
                     GLES20.glReadPixels(getDrawViewport().x, (getDrawViewport().height - mHeight) / 2 + getDrawViewport().y, mWidth, mHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, srcImage.getByteBuffer());
                     cvResize(srcImage, frame.image);

@@ -28,7 +28,6 @@ public class VideoRecordManager {
     private int taskPoolSize = 0;
     public int[] mRecordStateLock = new int[0];
     public boolean mShouldRecord = false;
-    private opencv_core.IplImage[] mIplImageCaches;
     private LinkedList<Frame> mImageList;//帧回收队列
     private Queue<Frame> mFrameQueue;//帧队列
 
@@ -76,21 +75,13 @@ public class VideoRecordManager {
     }
 
     private void initCache() {
-        mIplImageCaches = new opencv_core.IplImage[MAX_CACHED_FRAMES];
-        for (int i = 0; i != MAX_CACHED_FRAMES; ++i) {
-            mIplImageCaches[i] = cvCreateImage(new opencv_core.CvSize(mWidth, mHeight), opencv_core.IPL_DEPTH_8U, 4);
-        }
         mImageList = new LinkedList<>();
         mFrameQueue = new LinkedList<>();
-
-        for (opencv_core.IplImage img : mIplImageCaches) {
-            mImageList.add(makeFrame(img));
+        for (int i = 0; i != MAX_CACHED_FRAMES; ++i) {
+            mImageList.add(Frame.create(mWidth, mHeight, opencv_core.IPL_DEPTH_8U, 4));
         }
-        this.hasInit = true;
-    }
 
-    public Frame makeFrame(opencv_core.IplImage img) {
-        return new Frame(img, System.currentTimeMillis(), System.nanoTime());
+        this.hasInit = true;
     }
 
     public void pushCachedFrame(Frame frame) {
