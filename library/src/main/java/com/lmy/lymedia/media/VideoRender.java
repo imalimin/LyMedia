@@ -35,7 +35,7 @@ public class VideoRender {
     }
 
     public boolean init() {
-        return initGrabber() && initRecorder();
+        return initGrabber() && initRecorder(getWidth(),getHeight());
     }
 
     private boolean initGrabber() {
@@ -59,7 +59,7 @@ public class VideoRender {
         mFrameGrabber.setPixelFormat(fmt);
     }
 
-    private boolean initRecorder() {
+    private boolean initRecorder(int width,int height) {
         try {
             if (mFrameRecorder != null) {//如果已经有实例，则先释放资源再初始化
                 mFrameRecorder.stop();
@@ -77,8 +77,8 @@ public class VideoRender {
             mFrameRecorder.setVideoBitrate(mFrameGrabber.getVideoBitrate());
             mFrameRecorder.setAudioBitrate(mFrameGrabber.getAudioBitrate());
             mFrameRecorder.setAudioChannels(mFrameGrabber.getAudioChannels());
-            mFrameRecorder.setImageWidth(mFrameGrabber.getImageWidth());
-            mFrameRecorder.setImageHeight(mFrameGrabber.getImageHeight());
+            mFrameRecorder.setImageWidth(width);
+            mFrameRecorder.setImageHeight(height);
             mFrameRecorder.start();
         } catch (FrameRecorder.Exception e) {
             e.printStackTrace();
@@ -152,10 +152,10 @@ public class VideoRender {
                         mFrameRecorder.record(mFrame);
                         ++mFrameNumber;
                         publishProgress(mFrameNumber * 100 / mFrameGrabber.getLengthInFrames());
-                        Log.w("VideoRender", "Frame time: " + mFrameGrabber.getTimestamp());
+                        Log.w("VideoRender", "Frame num=" + mFrameNumber + ", time: " + mFrameGrabber.getTimestamp());
                     } else if (type == 1) {
                         mFrameRecorder.recordSamples(mFrame.samples);
-                    }
+                    } else break;
                 } catch (FrameGrabber.Exception e) {
                     e.printStackTrace();
                     ++mFrameNumber;
